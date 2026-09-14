@@ -1,0 +1,42 @@
+---
+description: إعادة تشغيل أدمن Next.js بعد التعديلات — يمنع 404 على chunks
+globs: admin/**/*
+alwaysApply: false
+---
+
+# Admin Next.js — dev cache
+
+## المشكلة
+
+تشغيل `npm run build` مع `npm run dev` معاً (أو build ثم dev بدون تنظيف) يفسد `.next` ويُنتج 404 على:
+`_next/static/chunks/main-app.js`, `layout.js`, `layout.css`, إلخ.
+
+## إلزامي بعد كل تعديل تحت `admin/`
+
+قبل إبلاغ المستخدم أن التحديث جاهز للاختبار:
+
+1. **لا** تشغّل `npm run build` والـ dev معاً.
+2. نفّذ من مجلد `admin`:
+   ```bash
+   npm run dev:fresh
+   ```
+   (يوقف المنفذ 3001، يحذف `.next`، يعيد `next dev`)
+3. إذا كان السيرفر يعمل في الخلفية بالفعل: أوقفه أولاً ثم `dev:fresh`.
+
+## للمستخدم عند 404 في المتصفح
+
+- Hard refresh: `Ctrl + Shift + R`
+- أو نافذة خاصة على http://localhost:3001
+
+## أوامر مفيدة (`admin/package.json`)
+
+| أمر | متى |
+|-----|-----|
+| `npm run dev:fresh` | بعد تعديلات الأدمن — **الافتراضي للوكيل** |
+| `npm run dev` | تشغيل عادي بدون تنظيف (فقط إذا `.next` سليم) |
+| `npm run build` | تحقق TypeScript — **أوقف dev أولاً** |
+| `npm run clean` | حذف `.next` فقط |
+
+## Laravel API
+
+الـ backend على المنفذ **8000** — منفصل؛ لا يحتاج نفس الإجراء.

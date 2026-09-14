@@ -1,0 +1,34 @@
+---
+description: عرض محتوى صفحات الأدمن ثابت 1024px ومتوسّط
+globs: admin/**/*.{tsx,ts}
+alwaysApply: false
+---
+
+# Admin content width
+
+كل صفحات لوحة التحكم (`admin/`) تستخدم عرض محتوى موحّد:
+
+- الثابت: `ADMIN_CONTENT_MAX_WIDTH = 1024` في `admin/src/lib/layout.ts`
+- الكلاس: `adminContentClass` (`mx-auto w-full max-w-[1024px]`)
+- الغلاف: مكوّن `AdminContent` من `admin/src/components/layout/admin-content.tsx`
+
+## إلزامي
+
+```tsx
+import { AdminContent } from '@/components/layout/admin-content';
+import { AdminHeader } from '@/components/layout/admin-header';
+
+<>
+  <AdminHeader title="…" crumb="…" />
+  <AdminContent>
+    {/* محتوى الصفحة */}
+  </AdminContent>
+</>
+```
+
+## ممنوع
+
+- `main` بعرض الشاشة الكامل بدون حد أقصى
+- اختراع `max-w-*` مختلف لكل صفحة (إلا استثناء صريح ومبرَّر)
+
+عند الحاجة لشريط لاصق (حفظ)، حاوية الزر تستخدم نفس `adminContentClass`.

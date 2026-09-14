@@ -1,0 +1,152 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Exact brand tokens from nextjs/admin */
+@theme inline {
+  --color-navy: #061a3a;
+  --color-navy-800: #0b234a;
+  --color-navy-700: #123163;
+  --color-navy-600: #1c4b8f;
+
+  --color-gold: #c8a24a;
+  --color-gold-soft: #e2c67f;
+  --color-gold-deep: #8a6a20;
+
+  --color-muted: #c3cbdd;
+  --color-muted-dim: #8f9bb8;
+  --color-muted-nav: #cdd4e6;
+
+  --color-cream: #f8f5ee;
+  --color-cream-soft: #fbf9f4;
+  --color-cream-line: #ece6d8;
+  --color-cream-line2: #e6dfd0;
+
+  --color-ink: #1c1a17;
+  --color-ink-soft: #4f5766;
+  --color-ink-dim: #8a8478;
+  --color-ink-faint: #a8a29a;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-cairo), system-ui, sans-serif;
+  --font-display: var(--font-messiri), serif;
+  --font-latin: var(--font-grotesk), sans-serif;
+  --font-heading: var(--font-cairo), system-ui, sans-serif;
+  --font-mono: var(--font-grotesk), monospace;
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-xl2: 18px;
+  --radius-xl3: 22px;
+  --radius-2xl: calc(var(--radius) * 1.8);
+
+  --shadow-gold: 0 18px 40px -14px rgba(200, 162, 74, 0.55);
+  --shadow-card: 0 18px 38px -18px rgba(0, 0, 0, 0.6);
+}
+
+:root {
+  --bg1: #123163;
+  --bg2: #0a1f45;
+  --bg3: #061a3a;
+  --line: rgba(212, 169, 54, 0.25);
+  --line2: rgba(212, 169, 54, 0.45);
+
+  --background: #f8f5ee;
+  --foreground: #1c1a17;
+  --card: #ffffff;
+  --card-foreground: #1c1a17;
+  --popover: #ffffff;
+  --popover-foreground: #1c1a17;
+  --primary: #c8a24a;
+  --primary-foreground: #061a3a;
+  --secondary: #fbf9f4;
+  --secondary-foreground: #061a3a;
+  --muted: #fbf9f4;
+  --muted-foreground: #8a8478;
+  --accent: #e2c67f;
+  --accent-foreground: #061a3a;
+  --destructive: #a34b4b;
+  --border: #ece6d8;
+  --input: #e6dfd0;
+  --ring: #c8a24a;
+  --chart-1: #c8a24a;
+  --chart-2: #1c4b8f;
+  --chart-3: #123163;
+  --chart-4: #e2c67f;
+  --chart-5: #8a6a20;
+  --radius: 0.75rem;
+  --sidebar: #061a3a;
+  --sidebar-foreground: #cdd4e6;
+  --sidebar-primary: #c8a24a;
+  --sidebar-primary-foreground: #061a3a;
+  --sidebar-accent: #0b234a;
+  --sidebar-accent-foreground: #e2c67f;
+  --sidebar-border: rgba(212, 169, 54, 0.2);
+  --sidebar-ring: #c8a24a;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-cream text-ink antialiased;
+    font-family: var(--font-cairo), system-ui, sans-serif;
+  }
+
+  html {
+    @apply font-sans;
+  }
+}
+
+.dots-layer {
+  background-image: radial-gradient(rgba(212, 169, 54, 0.14) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+/* aliases used by reference UI */
+.text-ink-soft { color: var(--color-ink-soft); }
+.text-ink-dim { color: var(--color-ink-dim); }
+.text-gold-deep { color: var(--color-gold-deep); }
+.text-muted-dim { color: var(--color-muted-dim); }
+
+.glass {
+  background: rgba(9, 26, 58, 0.62);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--line2);
+}
