@@ -71,6 +71,7 @@ class PermissionSeeder extends Seeder
         Permission::findOrCreate('settings.manage', 'web');
         Permission::findOrCreate('notifications.manage', 'web');
         Permission::findOrCreate('audit-logs.view', 'web');
+        Permission::findOrCreate('analytics.view', 'web');
         Permission::findOrCreate('marketing.view', 'web');
         Permission::findOrCreate('marketing.manage', 'web');
         Permission::findOrCreate('evaluations.manage-any', 'web');

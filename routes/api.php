@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\AbsenceAlertController;
 use App\Http\Controllers\Api\AbsenceAlertThresholdController;
 use App\Http\Controllers\Api\AcademicPeriodController;
@@ -68,6 +69,8 @@ use App\Http\Controllers\Api\Public\PublicPlanController;
 use App\Http\Controllers\Api\Public\PublicPrivateLessonInquiryController;
 use App\Http\Controllers\Api\Public\PublicPrivateLessonOfferController;
 use App\Http\Controllers\Api\Public\PublicPrivateLessonPeriodController;
+use App\Http\Controllers\Api\Public\PublicSeoSettingsController;
+use App\Http\Controllers\Api\Public\PublicTrackVisitController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\StaffAttendanceController;
 use App\Http\Controllers\Api\StaffProfileController;
@@ -95,6 +98,9 @@ Route::prefix('v1')->group(function () {
         Route::get('private-lesson-offers', [PublicPrivateLessonOfferController::class, 'index']);
         Route::get('private-lesson-offers/{offer}/slots', [PublicPrivateLessonOfferController::class, 'slots']);
         Route::get('private-lesson-periods', [PublicPrivateLessonPeriodController::class, 'index']);
+        Route::get('seo-settings', [PublicSeoSettingsController::class, 'show']);
+        Route::post('track-visit', [PublicTrackVisitController::class, 'store'])
+            ->middleware('throttle:30,1');
         Route::post('private-lesson-inquiries', [PublicPrivateLessonInquiryController::class, 'store'])
             ->middleware('throttle:8,1');
         Route::post('contact-messages', [PublicContactMessageController::class, 'store'])
@@ -173,6 +179,15 @@ Route::prefix('v1')->group(function () {
         Route::middleware('permission:audit-logs.view')->group(function () {
             Route::get('audit-logs', [AuditLogController::class, 'index']);
             Route::get('audit-logs/subject/{subject_type}/{subject_id}', [AuditLogController::class, 'forSubject']);
+        });
+
+        Route::middleware('permission:analytics.view')->prefix('analytics')->group(function () {
+            Route::get('overview', [AnalyticsController::class, 'overview']);
+            Route::get('timeseries', [AnalyticsController::class, 'timeseries']);
+            Route::get('top-pages', [AnalyticsController::class, 'topPages']);
+            Route::get('top-referrers', [AnalyticsController::class, 'topReferrers']);
+            Route::get('by-country', [AnalyticsController::class, 'byCountry']);
+            Route::get('by-device', [AnalyticsController::class, 'byDevice']);
         });
 
         Route::get('media', [MediaController::class, 'index']);

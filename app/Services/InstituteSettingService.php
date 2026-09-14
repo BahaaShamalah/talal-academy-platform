@@ -13,7 +13,7 @@ class InstituteSettingService
 
     public function get(): InstituteSetting
     {
-        return InstituteSetting::current()->load(['logoMedia', 'stampMedia']);
+        return InstituteSetting::current()->load(['logoMedia', 'stampMedia', 'faviconMedia', 'ogImageMedia']);
     }
 
     /**
@@ -24,6 +24,8 @@ class InstituteSettingService
         $settings = InstituteSetting::current();
         $oldLogoId = $settings->logo_media_id;
         $oldStampId = $settings->stamp_media_id;
+        $oldFaviconId = $settings->favicon_media_id;
+        $oldOgImageId = $settings->og_image_media_id;
 
         if (! empty($data['remove_logo'])) {
             $data['logo_media_id'] = null;
@@ -33,7 +35,22 @@ class InstituteSettingService
             $data['stamp_media_id'] = null;
         }
 
-        unset($data['remove_logo'], $data['remove_stamp'], $data['logo'], $data['stamp']);
+        if (! empty($data['remove_favicon'])) {
+            $data['favicon_media_id'] = null;
+        }
+
+        if (! empty($data['remove_og_image'])) {
+            $data['og_image_media_id'] = null;
+        }
+
+        unset(
+            $data['remove_logo'],
+            $data['remove_stamp'],
+            $data['remove_favicon'],
+            $data['remove_og_image'],
+            $data['logo'],
+            $data['stamp'],
+        );
 
         if ($logo) {
             $media = $this->mediaService->store($logo, 'شعار المعهد', auth()->id());
@@ -46,21 +63,26 @@ class InstituteSettingService
         }
 
         // Explicit media_id from MediaPicker takes precedence when no file uploaded.
-        if (array_key_exists('logo_media_id', $data) && $data['logo_media_id'] !== null) {
-            $data['logo_media_id'] = (int) $data['logo_media_id'];
-        }
-        if (array_key_exists('stamp_media_id', $data) && $data['stamp_media_id'] !== null) {
-            $data['stamp_media_id'] = (int) $data['stamp_media_id'];
+        foreach (['logo_media_id', 'stamp_media_id', 'favicon_media_id', 'og_image_media_id'] as $mediaKey) {
+            if (array_key_exists($mediaKey, $data) && $data[$mediaKey] !== null) {
+                $data[$mediaKey] = (int) $data[$mediaKey];
+            }
         }
 
         $settings->update($data);
-        $settings = $settings->refresh()->load(['logoMedia', 'stampMedia']);
+        $settings = $settings->refresh()->load(['logoMedia', 'stampMedia', 'faviconMedia', 'ogImageMedia']);
 
         if (array_key_exists('logo_media_id', $data) && $oldLogoId && (int) $oldLogoId !== (int) $settings->logo_media_id) {
             $this->mediaService->deleteIfOrphan((int) $oldLogoId);
         }
         if (array_key_exists('stamp_media_id', $data) && $oldStampId && (int) $oldStampId !== (int) $settings->stamp_media_id) {
             $this->mediaService->deleteIfOrphan((int) $oldStampId);
+        }
+        if (array_key_exists('favicon_media_id', $data) && $oldFaviconId && (int) $oldFaviconId !== (int) $settings->favicon_media_id) {
+            $this->mediaService->deleteIfOrphan((int) $oldFaviconId);
+        }
+        if (array_key_exists('og_image_media_id', $data) && $oldOgImageId && (int) $oldOgImageId !== (int) $settings->og_image_media_id) {
+            $this->mediaService->deleteIfOrphan((int) $oldOgImageId);
         }
 
         return $settings;

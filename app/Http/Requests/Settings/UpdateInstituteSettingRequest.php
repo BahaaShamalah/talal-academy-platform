@@ -37,6 +37,14 @@ class UpdateInstituteSettingRequest extends FormRequest
             'stamp_media_id' => ['nullable', 'integer', 'exists:media,id'],
             'remove_logo' => ['sometimes', 'boolean'],
             'remove_stamp' => ['sometimes', 'boolean'],
+            'seo_title' => ['nullable', 'string', 'max:255'],
+            'seo_description' => ['nullable', 'string', 'max:500'],
+            'favicon_media_id' => ['nullable', 'integer', 'exists:media,id'],
+            'og_image_media_id' => ['nullable', 'integer', 'exists:media,id'],
+            'remove_favicon' => ['sometimes', 'boolean'],
+            'remove_og_image' => ['sometimes', 'boolean'],
+            'google_analytics_id' => ['nullable', 'string', 'max:50'],
+            'google_search_console_verification' => ['nullable', 'string', 'max:512'],
         ];
     }
 }

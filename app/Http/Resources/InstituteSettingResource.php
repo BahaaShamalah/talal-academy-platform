@@ -14,7 +14,7 @@ class InstituteSettingResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $this->resource->loadMissing(['logoMedia', 'stampMedia']);
+        $this->resource->loadMissing(['logoMedia', 'stampMedia', 'faviconMedia', 'ogImageMedia']);
 
         return [
             'id' => $this->id,
@@ -30,6 +30,14 @@ class InstituteSettingResource extends JsonResource
             'commercial_registration_number' => $this->commercial_registration_number,
             'invoice_footer_note' => $this->invoice_footer_note,
             'director_name' => $this->director_name,
+            'seo_title' => $this->seo_title,
+            'seo_description' => $this->seo_description,
+            'favicon_media_id' => $this->favicon_media_id,
+            'favicon_url' => $this->faviconMedia?->url(),
+            'og_image_media_id' => $this->og_image_media_id,
+            'og_image_url' => $this->ogImageMedia?->url(),
+            'google_analytics_id' => $this->google_analytics_id,
+            'google_search_console_verification' => $this->google_search_console_verification,
             'private_lesson_periods' => is_array($this->private_lesson_periods) && $this->private_lesson_periods !== []
                 ? $this->private_lesson_periods
                 : InstituteSetting::defaultPrivateLessonPeriods(),

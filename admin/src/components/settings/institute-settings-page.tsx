@@ -20,6 +20,10 @@ type FormState = {
   commercial_registration_number: string;
   invoice_footer_note: string;
   director_name: string;
+  seo_title: string;
+  seo_description: string;
+  google_analytics_id: string;
+  google_search_console_verification: string;
 };
 
 function Section({
@@ -56,6 +60,47 @@ function emptyPeriod(): PrivateLessonPeriod {
   };
 }
 
+function SeoSharePreview({
+  title,
+  description,
+  imageUrl,
+  siteLabel,
+}: {
+  title: string;
+  description: string;
+  imageUrl: string | null;
+  siteLabel: string;
+}) {
+  return (
+    <div className="mt-5 overflow-hidden rounded-[14px] border border-[#d8dee6] bg-[#e8edf2] p-3">
+      <p className="mb-2 text-[11.5px] font-semibold text-[#5d6879]">معاينة رابط واتساب / مشاركة</p>
+      <div className="overflow-hidden rounded-[12px] border border-[#cfd6df] bg-white shadow-sm">
+        <div className="aspect-[1200/630] max-h-[160px] w-full bg-[#edf1f5]">
+          {imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={imageUrl} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full items-center justify-center text-[12px] text-[#8a93a0]">
+              بدون صورة معاينة
+            </div>
+          )}
+        </div>
+        <div className="space-y-0.5 px-3 py-2.5" dir="rtl">
+          <div className="truncate text-[11px] uppercase tracking-wide text-[#7a8491]">
+            {siteLabel || 'talalacademy.com'}
+          </div>
+          <div className="line-clamp-2 text-[13.5px] font-bold leading-snug text-[#111b27]">
+            {title || 'عنوان الموقع'}
+          </div>
+          <div className="line-clamp-2 text-[12px] leading-relaxed text-[#5d6879]">
+            {description || 'وصف الموقع يظهر هنا…'}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function InstituteSettingsPage() {
   const canManage = useAuthStore((s) => s.hasPermission('settings.manage'));
   const qc = useQueryClient();
@@ -68,8 +113,14 @@ export function InstituteSettingsPage() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [stampId, setStampId] = useState<number | null>(null);
   const [stampUrl, setStampUrl] = useState<string | null>(null);
+  const [faviconId, setFaviconId] = useState<number | null>(null);
+  const [faviconUrl, setFaviconUrl] = useState<string | null>(null);
+  const [ogImageId, setOgImageId] = useState<number | null>(null);
+  const [ogImageUrl, setOgImageUrl] = useState<string | null>(null);
   const [removeLogo, setRemoveLogo] = useState(false);
   const [removeStamp, setRemoveStamp] = useState(false);
+  const [removeFavicon, setRemoveFavicon] = useState(false);
+  const [removeOgImage, setRemoveOgImage] = useState(false);
 
   const settingsQuery = useQuery({
     queryKey: ['institute-settings'],
@@ -84,6 +135,10 @@ export function InstituteSettingsPage() {
         commercial_registration_number: data.commercial_registration_number ?? '',
         invoice_footer_note: data.invoice_footer_note ?? '',
         director_name: data.director_name ?? '',
+        seo_title: data.seo_title ?? '',
+        seo_description: data.seo_description ?? '',
+        google_analytics_id: data.google_analytics_id ?? '',
+        google_search_console_verification: data.google_search_console_verification ?? '',
       });
       setPeriods(
         (data.private_lesson_periods ?? []).map((p) => ({
@@ -97,8 +152,14 @@ export function InstituteSettingsPage() {
       setLogoUrl(data.logo_url ?? null);
       setStampId(data.stamp_media_id ?? null);
       setStampUrl(data.stamp_url ?? null);
+      setFaviconId(data.favicon_media_id ?? null);
+      setFaviconUrl(data.favicon_url ?? null);
+      setOgImageId(data.og_image_media_id ?? null);
+      setOgImageUrl(data.og_image_url ?? null);
       setRemoveLogo(false);
       setRemoveStamp(false);
+      setRemoveFavicon(false);
+      setRemoveOgImage(false);
       return data;
     },
     enabled: canManage,
@@ -122,6 +183,10 @@ export function InstituteSettingsPage() {
         commercial_registration_number: form.commercial_registration_number.trim() || null,
         invoice_footer_note: form.invoice_footer_note.trim() || null,
         director_name: form.director_name.trim() || null,
+        seo_title: form.seo_title.trim() || null,
+        seo_description: form.seo_description.trim() || null,
+        google_analytics_id: form.google_analytics_id.trim() || null,
+        google_search_console_verification: form.google_search_console_verification.trim() || null,
         private_lesson_periods: periods.map((p) => ({
           id: p.id,
           name_ar: p.name_ar.trim(),
@@ -134,6 +199,10 @@ export function InstituteSettingsPage() {
       else if (logoId) payload.logo_media_id = logoId;
       if (removeStamp) payload.remove_stamp = true;
       else if (stampId) payload.stamp_media_id = stampId;
+      if (removeFavicon) payload.remove_favicon = true;
+      else if (faviconId) payload.favicon_media_id = faviconId;
+      if (removeOgImage) payload.remove_og_image = true;
+      else if (ogImageId) payload.og_image_media_id = ogImageId;
 
       return apiClient<InstituteSetting>('/settings/institute', {
         method: 'PUT',
@@ -144,11 +213,17 @@ export function InstituteSettingsPage() {
       toast.success('تم حفظ إعدادات المعهد');
       setRemoveLogo(false);
       setRemoveStamp(false);
+      setRemoveFavicon(false);
+      setRemoveOgImage(false);
       if (data) {
         setLogoId(data.logo_media_id ?? null);
         setLogoUrl(data.logo_url ?? null);
         setStampId(data.stamp_media_id ?? null);
         setStampUrl(data.stamp_url ?? null);
+        setFaviconId(data.favicon_media_id ?? null);
+        setFaviconUrl(data.favicon_url ?? null);
+        setOgImageId(data.og_image_media_id ?? null);
+        setOgImageUrl(data.og_image_url ?? null);
         if (data.private_lesson_periods) {
           setPeriods(
             data.private_lesson_periods.map((p) => ({
@@ -179,6 +254,12 @@ export function InstituteSettingsPage() {
       </>
     );
   }
+
+  const previewTitle =
+    form?.seo_title.trim() || form?.institute_name_ar.trim() || 'طلال أكاديمي';
+  const previewDescription =
+    form?.seo_description.trim() ||
+    'برامج تعليمية حضورية ومتابعة مستمرة لطلاب المراحل في الكويت.';
 
   return (
     <>
@@ -308,6 +389,136 @@ export function InstituteSettingsPage() {
                   />
                 </div>
               </div>
+            </Section>
+
+            <Section title="إعدادات السيو" icon="fa-solid fa-magnifying-glass-chart">
+              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label className={formLabelClass}>عنوان الموقع الافتراضي</label>
+                  <input
+                    className={formFieldClass}
+                    maxLength={255}
+                    placeholder="طلال أكاديمي | تعليم حضوري في الكويت"
+                    value={form.seo_title}
+                    onChange={(e) => setForm((f) => (f ? { ...f, seo_title: e.target.value } : f))}
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className={formLabelClass}>وصف الموقع</label>
+                  <textarea
+                    className={`${formFieldClass} min-h-[96px]`}
+                    maxLength={500}
+                    placeholder="وصف قصير يظهر في نتائج البحث ومعاينة الروابط…"
+                    value={form.seo_description}
+                    onChange={(e) => setForm((f) => (f ? { ...f, seo_description: e.target.value } : f))}
+                  />
+                  <p className="mt-1.5 text-[11.5px] text-ink-dim">
+                    الطول المثالي لمحركات البحث حوالي 160 حرفًا ({form.seo_description.length}/160)
+                  </p>
+                </div>
+                <div>
+                  <MediaPicker
+                    label="Favicon"
+                    valueId={removeFavicon ? null : faviconId}
+                    valueUrl={removeFavicon ? null : faviconUrl}
+                    onChange={(m) => {
+                      setFaviconId(m.id);
+                      setFaviconUrl(m.url);
+                      setRemoveFavicon(false);
+                    }}
+                    onClear={() => {
+                      setFaviconId(null);
+                      setFaviconUrl(null);
+                      setRemoveFavicon(true);
+                    }}
+                  />
+                  <p className="mt-1.5 text-[11.5px] text-ink-dim">الحجم المثالي: مربع 512×512</p>
+                </div>
+                <div>
+                  <MediaPicker
+                    label="صورة معاينة المشاركة (Open Graph)"
+                    valueId={removeOgImage ? null : ogImageId}
+                    valueUrl={removeOgImage ? null : ogImageUrl}
+                    forceFormat="jpeg"
+                    onChange={(m) => {
+                      setOgImageId(m.id);
+                      setOgImageUrl(m.url);
+                      setRemoveOgImage(false);
+                    }}
+                    onClear={() => {
+                      setOgImageId(null);
+                      setOgImageUrl(null);
+                      setRemoveOgImage(true);
+                    }}
+                  />
+                  <p className="mt-1.5 text-[11.5px] text-ink-dim">
+                    الحجم المثالي: 1200×630 لعرض أفضل في واتساب وفيسبوك
+                  </p>
+                </div>
+              </div>
+
+              <SeoSharePreview
+                title={previewTitle}
+                description={previewDescription}
+                imageUrl={removeOgImage ? null : ogImageUrl}
+                siteLabel="talalacademy.com"
+              />
+            </Section>
+
+            <Section title="التكاملات" icon="fa-brands fa-google">
+              <div className="grid grid-cols-1 gap-3.5">
+                <div>
+                  <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+                    <label className={formLabelClass + ' !mb-0'}>معرّف Google Analytics</label>
+                    <a
+                      href="https://analytics.google.com"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[11.5px] font-semibold text-gold-deep hover:underline"
+                    >
+                      كيف أحصل عليه؟
+                    </a>
+                  </div>
+                  <input
+                    className={formFieldClass}
+                    dir="ltr"
+                    maxLength={50}
+                    placeholder="G-XXXXXXXXXX"
+                    value={form.google_analytics_id}
+                    onChange={(e) =>
+                      setForm((f) => (f ? { ...f, google_analytics_id: e.target.value } : f))
+                    }
+                  />
+                </div>
+                <div>
+                  <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+                    <label className={formLabelClass + ' !mb-0'}>كود تحقق Search Console</label>
+                    <a
+                      href="https://search.google.com/search-console"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[11.5px] font-semibold text-gold-deep hover:underline"
+                    >
+                      كيف أحصل عليه؟
+                    </a>
+                  </div>
+                  <input
+                    className={formFieldClass}
+                    dir="ltr"
+                    maxLength={512}
+                    placeholder="نص طويل تعطيه Google"
+                    value={form.google_search_console_verification}
+                    onChange={(e) =>
+                      setForm((f) =>
+                        f ? { ...f, google_search_console_verification: e.target.value } : f,
+                      )
+                    }
+                  />
+                </div>
+              </div>
+              <p className="mt-3 text-[11.5px] text-ink-dim">
+                اترك الحقول فاضية لو ما عندك حسابات Google جاهزة بعد — الموقع يشتغل عادي بدونها
+              </p>
             </Section>
 
             <Section title="مواعيد الحصص الخاصة" icon="fa-regular fa-clock">

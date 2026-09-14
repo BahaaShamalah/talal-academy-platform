@@ -17,6 +17,15 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
 
+        // Next.js (and reverse proxies) may forward the real visitor IP.
+        $trusted = array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('TRUSTED_PROXIES', '127.0.0.1,::1'))
+        )));
+        if ($trusted !== []) {
+            $middleware->trustProxies(at: $trusted);
+        }
+
         $middleware->validateCsrfTokens(except: [
             'api/v1/webhooks/myfatoorah',
         ]);

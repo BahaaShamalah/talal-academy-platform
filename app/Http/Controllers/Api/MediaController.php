@@ -30,6 +30,7 @@ class MediaController extends Controller
             $request->file('file'),
             $request->validated('alt_text'),
             $request->user()?->id,
+            $request->validated('force_format'),
         );
 
         return (new MediaResource($media))

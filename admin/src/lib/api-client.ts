@@ -870,6 +870,14 @@ export type InstituteSetting = {
   commercial_registration_number?: string | null;
   invoice_footer_note?: string | null;
   director_name?: string | null;
+  seo_title?: string | null;
+  seo_description?: string | null;
+  favicon_media_id?: number | null;
+  favicon_url?: string | null;
+  og_image_media_id?: number | null;
+  og_image_url?: string | null;
+  google_analytics_id?: string | null;
+  google_search_console_verification?: string | null;
   private_lesson_periods?: PrivateLessonPeriod[];
   updated_at?: string;
 };

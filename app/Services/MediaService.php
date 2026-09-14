@@ -70,33 +70,49 @@ class MediaService
         ]);
     }
 
-    public function store(UploadedFile $file, ?string $altText = null, ?int $uploadedBy = null): Media
-    {
+    public function store(
+        UploadedFile $file,
+        ?string $altText = null,
+        ?int $uploadedBy = null,
+        ?string $forceFormat = null,
+    ): Media {
         $this->assertValidImage($file);
 
-        $format = $this->preferredFormat();
+        $format = $this->resolveOutputFormat($forceFormat);
         $quality = (int) config('media.quality', 80);
         $disk = (string) config('media.disk', 'public');
         $directory = trim((string) config('media.directory', 'media'), '/');
         $uuid = (string) Str::uuid();
-        $relativePath = $directory.'/'.$uuid.'.'.$format;
+        $extension = $format === 'jpeg' ? 'jpg' : $format;
+        $relativePath = $directory.'/'.$uuid.'.'.$extension;
 
         $manager = new ImageManager(new Driver);
         $image = $manager->read($file->getRealPath());
 
-        $encoded = $format === 'avif'
-            ? $image->toAvif($quality)
-            : $image->toWebp($quality);
+        $encoded = match ($format) {
+            'avif' => $image->toAvif($quality),
+            'webp' => $image->toWebp($quality),
+            'jpeg' => $image->toJpeg($quality),
+            default => throw ValidationException::withMessages([
+                'file' => ['صيغة الإخراج غير مدعومة.'],
+            ]),
+        };
 
         $binary = (string) $encoded;
         Storage::disk($disk)->put($relativePath, $binary);
+
+        $mimeType = match ($format) {
+            'avif' => 'image/avif',
+            'webp' => 'image/webp',
+            'jpeg' => 'image/jpeg',
+        };
 
         $media = Media::query()->create([
             'uuid' => $uuid,
             'original_filename' => $file->getClientOriginalName(),
             'disk' => $disk,
             'path' => $relativePath,
-            'mime_type' => $format === 'avif' ? 'image/avif' : 'image/webp',
+            'mime_type' => $mimeType,
             'width' => $image->width(),
             'height' => $image->height(),
             'size_bytes' => strlen($binary),
@@ -110,6 +126,24 @@ class MediaService
         ])->save();
 
         return $media->refresh();
+    }
+
+    /**
+     * @param  'avif'|'webp'|'jpeg'|null  $forceFormat
+     */
+    public function resolveOutputFormat(?string $forceFormat = null): string
+    {
+        if ($forceFormat !== null && $forceFormat !== '') {
+            if (! in_array($forceFormat, ['avif', 'webp', 'jpeg'], true)) {
+                throw ValidationException::withMessages([
+                    'force_format' => ['الصيغة المسموحة: avif أو webp أو jpeg.'],
+                ]);
+            }
+
+            return $forceFormat;
+        }
+
+        return $this->preferredFormat();
     }
 
     /** Unified studio name: ta-00001-26 (prefix + zero-padded id + 2-digit year). */
@@ -147,6 +181,12 @@ class MediaService
         }
         if ($settings?->stamp_media_id === $media->id) {
             $labels[] = 'ختم المعهد (إعدادات المعهد)';
+        }
+        if ($settings?->favicon_media_id === $media->id) {
+            $labels[] = 'أيقونة الموقع Favicon (إعدادات السيو)';
+        }
+        if ($settings?->og_image_media_id === $media->id) {
+            $labels[] = 'صورة معاينة المشاركة (إعدادات السيو)';
         }
 
         $products = Product::query()

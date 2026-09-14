@@ -28,6 +28,9 @@
 !/storage/app/public/.gitignore
 /storage/app/private/*
 !/storage/app/private/.gitignore
+# MaxMind GeoLite2 (large, updated separately — never commit)
+/storage/app/geoip/
+*.mmdb
 *.sqlite
 *.sqlite-journal
 /vendor

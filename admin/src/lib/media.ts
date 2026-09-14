@@ -42,10 +42,15 @@ export async function fetchMediaList(params: {
   return { items: filtered, total };
 }
 
-export async function uploadMediaFile(file: File, altText?: string): Promise<MediaItem> {
+export async function uploadMediaFile(
+  file: File,
+  altText?: string,
+  forceFormat?: 'avif' | 'webp' | 'jpeg',
+): Promise<MediaItem> {
   const body = new FormData();
   body.append('file', file);
   if (altText) body.append('alt_text', altText);
+  if (forceFormat) body.append('force_format', forceFormat);
 
   const res = await fetch('/api/proxy/media', { method: 'POST', body });
   const json = await res.json().catch(() => null);
@@ -62,12 +67,13 @@ export async function uploadMediaFile(file: File, altText?: string): Promise<Med
 export async function uploadMediaSequential(
   files: File[],
   onProgress: (index: number, status: 'uploading' | 'done' | 'error', error?: string) => void,
+  forceFormat?: 'avif' | 'webp' | 'jpeg',
 ): Promise<MediaItem[]> {
   const uploaded: MediaItem[] = [];
   for (let i = 0; i < files.length; i++) {
     onProgress(i, 'uploading');
     try {
-      const media = await uploadMediaFile(files[i]);
+      const media = await uploadMediaFile(files[i], undefined, forceFormat);
       uploaded.push(media);
       onProgress(i, 'done');
     } catch (err) {

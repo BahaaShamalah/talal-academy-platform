@@ -15,6 +15,7 @@ export function MediaPicker({
   onChange,
   onClear,
   compact,
+  forceFormat,
 }: {
   label: string;
   valueId?: number | null;
@@ -22,6 +23,7 @@ export function MediaPicker({
   onChange: (media: MediaItem) => void;
   onClear?: () => void;
   compact?: boolean;
+  forceFormat?: 'avif' | 'webp' | 'jpeg';
 }) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<'library' | 'upload'>('library');
@@ -38,7 +40,7 @@ export function MediaPicker({
     if (!file || !file.type.startsWith('image/')) return;
     setBusy(true);
     try {
-      const media = await uploadMediaFile(file);
+      const media = await uploadMediaFile(file, undefined, forceFormat);
       onChange(media);
       toast.success('تم رفع الصورة');
     } catch (err) {
@@ -154,7 +156,14 @@ export function MediaPicker({
               </button>
             </div>
             <div className="max-h-[65vh] overflow-y-auto p-4">
-              <MediaBrowser selectable selectedId={valueId} onSelect={pick} compact mode={tab === 'library' ? 'library' : 'upload'} />
+              <MediaBrowser
+                selectable
+                selectedId={valueId}
+                onSelect={pick}
+                compact
+                mode={tab === 'library' ? 'library' : 'upload'}
+                forceFormat={forceFormat}
+              />
             </div>
           </div>
         </div>

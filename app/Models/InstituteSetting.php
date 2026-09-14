@@ -17,6 +17,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'commercial_registration_number',
     'invoice_footer_note',
     'director_name',
+    'seo_title',
+    'seo_description',
+    'favicon_media_id',
+    'og_image_media_id',
+    'google_analytics_id',
+    'google_search_console_verification',
     'private_lesson_periods',
 ])]
 class InstituteSetting extends Model
@@ -86,6 +92,16 @@ class InstituteSetting extends Model
     public function stampMedia(): BelongsTo
     {
         return $this->belongsTo(Media::class, 'stamp_media_id');
+    }
+
+    public function faviconMedia(): BelongsTo
+    {
+        return $this->belongsTo(Media::class, 'favicon_media_id');
+    }
+
+    public function ogImageMedia(): BelongsTo
+    {
+        return $this->belongsTo(Media::class, 'og_image_media_id');
     }
 
     public function logoAbsolutePath(): ?string

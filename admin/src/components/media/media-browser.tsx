@@ -56,12 +56,14 @@ export function MediaBrowser({
   onSelect,
   compact,
   mode = 'full',
+  forceFormat,
 }: {
   selectable?: boolean;
   selectedId?: number | null;
   onSelect?: (item: MediaItem) => void;
   compact?: boolean;
   mode?: 'full' | 'library' | 'upload';
+  forceFormat?: 'avif' | 'webp' | 'jpeg';
 }) {
   const [search, setSearch] = useState('');
   const [mime, setMime] = useState('');
@@ -92,16 +94,20 @@ export function MediaBrowser({
       }));
       setJobs(nextJobs);
 
-      await uploadMediaSequential(files, (index, status, error) => {
-        setJobs((prev) =>
-          prev.map((j, i) => (i === index ? { ...j, status, error } : j)),
-        );
-      });
+      await uploadMediaSequential(
+        files,
+        (index, status, error) => {
+          setJobs((prev) =>
+            prev.map((j, i) => (i === index ? { ...j, status, error } : j)),
+          );
+        },
+        forceFormat,
+      );
 
       qc.invalidateQueries({ queryKey: ['media'] });
       toast.success('اكتمل رفع الصور');
     },
-    [qc],
+    [qc, forceFormat],
   );
 
   function onFilesPicked(list: FileList | null) {
