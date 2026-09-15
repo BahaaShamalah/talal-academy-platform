@@ -1185,6 +1185,40 @@ export type OutstandingStudentRow = {
   pending_installments: number;
 };
 
+export type AnalyticsOverview = {
+  total_visits: number;
+  unique_visitors: number;
+  avg_daily_visits: number;
+  from: string;
+  to: string;
+};
+
+export type AnalyticsTimeseriesPoint = {
+  period: string;
+  visits: number;
+  unique_visitors: number;
+};
+
+export type AnalyticsTopPage = {
+  path: string;
+  visits: number;
+};
+
+export type AnalyticsTopReferrer = {
+  referrer: string;
+  visits: number;
+};
+
+export type AnalyticsCountryRow = {
+  country_code: string | null;
+  visits: number;
+};
+
+export type AnalyticsDeviceRow = {
+  device_type: string;
+  visits: number;
+};
+
 export function formatKwd(amount: string | number | null | undefined): string {
   const n = Number(amount ?? 0);
   return `${n.toLocaleString('en-US', {
