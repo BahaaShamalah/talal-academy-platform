@@ -156,6 +156,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: 'إعدادات السيو', href: '/dashboard/seo-settings', icon: 'fa-solid fa-magnifying-glass-chart', permission: 'settings.manage' },
       { title: 'استديو الوسائط', href: '/dashboard/media', icon: 'fa-solid fa-photo-film', permission: 'settings.manage' },
       { title: 'محتوى الموقع', href: '/dashboard/marketing', icon: 'fa-solid fa-pen-nib', permission: 'marketing.manage' },
+      { title: 'الصفحات القانونية', href: '/dashboard/legal-pages', icon: 'fa-solid fa-scale-balanced', permission: 'marketing.manage' },
       { title: 'تحليلات الزوار', href: '/dashboard/analytics', icon: 'fa-solid fa-chart-area', permission: 'analytics.view' },
       { title: 'قوالب الإشعارات', href: '/dashboard/notification-templates', icon: 'fa-solid fa-envelope-open-text', permission: 'notifications.manage' },
       { title: 'سجل التدقيق', href: '/dashboard/audit-logs', icon: 'fa-solid fa-clipboard-list', permission: 'audit-logs.view' },

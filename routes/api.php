@@ -44,6 +44,7 @@ use App\Http\Controllers\Api\InvoiceInstallmentController;
 use App\Http\Controllers\Api\InvoiceRefundController;
 use App\Http\Controllers\Api\LeaveRequestController;
 use App\Http\Controllers\Api\LeaveTypeController;
+use App\Http\Controllers\Api\LegalPageController;
 use App\Http\Controllers\Api\MarketingSectionController;
 use App\Http\Controllers\Api\MediaController;
 use App\Http\Controllers\Api\MeController;
@@ -64,6 +65,7 @@ use App\Http\Controllers\Api\ProductTypeController;
 use App\Http\Controllers\Api\Public\PublicContactMessageController;
 use App\Http\Controllers\Api\Public\PublicEducationalStageController;
 use App\Http\Controllers\Api\Public\PublicGradeController;
+use App\Http\Controllers\Api\Public\PublicLegalPageController;
 use App\Http\Controllers\Api\Public\PublicMarketingSectionController;
 use App\Http\Controllers\Api\Public\PublicPlanController;
 use App\Http\Controllers\Api\Public\PublicPrivateLessonInquiryController;
@@ -99,6 +101,7 @@ Route::prefix('v1')->group(function () {
         Route::get('private-lesson-offers/{offer}/slots', [PublicPrivateLessonOfferController::class, 'slots']);
         Route::get('private-lesson-periods', [PublicPrivateLessonPeriodController::class, 'index']);
         Route::get('seo-settings', [PublicSeoSettingsController::class, 'show']);
+        Route::get('legal-pages/{key}', [PublicLegalPageController::class, 'show']);
         Route::post('track-visit', [PublicTrackVisitController::class, 'store'])
             ->middleware('throttle:30,1');
         Route::post('private-lesson-inquiries', [PublicPrivateLessonInquiryController::class, 'store'])
@@ -556,6 +559,8 @@ Route::prefix('v1')->group(function () {
         Route::middleware('permission:marketing.view|marketing.manage')->group(function () {
             Route::get('marketing-sections', [MarketingSectionController::class, 'index']);
             Route::get('marketing-sections/{marketing_section}', [MarketingSectionController::class, 'show']);
+            Route::get('legal-pages', [LegalPageController::class, 'index']);
+            Route::get('legal-pages/{key}', [LegalPageController::class, 'show']);
         });
         Route::middleware('permission:marketing.manage')->group(function () {
             Route::post('marketing-sections', [MarketingSectionController::class, 'store']);
@@ -563,6 +568,7 @@ Route::prefix('v1')->group(function () {
             Route::patch('marketing-sections/{marketing_section}', [MarketingSectionController::class, 'update']);
             Route::delete('marketing-sections/{marketing_section}', [MarketingSectionController::class, 'destroy']);
             Route::post('marketing-sections/{marketing_section}/upload', [MarketingSectionController::class, 'upload']);
+            Route::put('legal-pages/{key}', [LegalPageController::class, 'update']);
         });
 
         Route::get('settings/institute', [InstituteSettingController::class, 'show']);

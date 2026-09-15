@@ -48,9 +48,9 @@ export const MARKETING_FALLBACKS: MarketingMap = {
     nav_items: navItems.map((n) => ({ view_id: n.id, label: n.label, icon: n.icon })),
     tab_items: tabItems.map((n) => ({ view_id: n.id, label: n.label, icon: n.icon })),
     footer_legal_links: [
-      { label: 'الشروط والأحكام', url: '#' },
-      { label: 'سياسة الخصوصية', url: '#' },
-      { label: 'سياسة الاسترجاع', url: '#' },
+      { label: 'سياسة الخصوصية', url: '/privacy' },
+      { label: 'الشروط والأحكام', url: '/terms' },
+      { label: 'سياسة الاسترجاع', url: '/refund-policy' },
     ],
     social_links: [
       { platform: 'whatsapp', url: '' },

@@ -1,5 +1,6 @@
 'use client';
 import Image from 'next/image';
+import Link from 'next/link';
 import type { ViewId } from '@/types';
 import Icon from './ui/Icon';
 import { useMarketing } from './MarketingProvider';
@@ -11,6 +12,13 @@ const SOCIAL_ICONS: Record<string, string> = {
   snapchat: 'fa-brands fa-snapchat',
   'x-twitter': 'fa-brands fa-x-twitter',
 };
+
+/** Always shown — CMS links may be outdated (#) from older content. */
+const DEFAULT_LEGAL_LINKS = [
+  { label: 'سياسة الخصوصية', url: '/privacy' },
+  { label: 'الشروط والأحكام', url: '/terms' },
+  { label: 'سياسة الاسترجاع', url: '/refund-policy' },
+];
 
 type NavContent = {
   institute_name_ar: string;
@@ -40,6 +48,8 @@ export default function Footer({ onNavigate }: { onNavigate: (v: ViewId) => void
   const contact = useSection<ContactSlice>(useMarketing(), 'contact');
 
   if (!nav) return null;
+
+  const legalLinks = DEFAULT_LEGAL_LINKS;
 
   return (
     <footer className="app-pad border-t border-gold/[.18] bg-navy px-4 py-10 sm:px-8">
@@ -134,10 +144,10 @@ export default function Footer({ onNavigate }: { onNavigate: (v: ViewId) => void
           © {new Date().getFullYear()} {nav.footer_copyright}
         </span>
         <span className="flex flex-wrap gap-4">
-          {(nav.footer_legal_links ?? []).map((l) => (
-            <a key={l.label} href={l.url || '#'}>
+          {legalLinks.map((l) => (
+            <Link key={l.url} href={l.url} className="hover:text-gold">
               {l.label}
-            </a>
+            </Link>
           ))}
         </span>
       </div>
