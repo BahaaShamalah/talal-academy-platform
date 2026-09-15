@@ -19,6 +19,19 @@ import {
   StringList,
 } from './fields';
 
+const SECTION_ORDER = [
+  'hero',
+  'announcements',
+  'nav',
+  'programs',
+  'pricing',
+  'about',
+  'faq',
+  'contact',
+  'registration',
+  'private-lessons',
+] as const;
+
 const LABELS: Record<string, string> = {
   hero: 'الرئيسية',
   announcements: 'شريط الإعلانات',
@@ -76,17 +89,27 @@ export function MarketingPage() {
   const qc = useQueryClient();
   const [editing, setEditing] = useState<MarketingSection | null>(null);
   const [draft, setDraft] = useState<Record<string, unknown>>({});
+  const [showAdvancedCreate, setShowAdvancedCreate] = useState(false);
+  const [newKey, setNewKey] = useState('');
+  const [newJson, setNewJson] = useState('{\n  \n}');
 
   const query = useQuery({
     queryKey: ['marketing-sections'],
     queryFn: async () => {
       const res = await apiClient<{ data: MarketingSection[] } | MarketingSection[]>('/marketing-sections');
-      return Array.isArray(res) ? res : res.data ?? [];
+      const list = Array.isArray(res) ? res : res?.data;
+      return Array.isArray(list) ? list : [];
     },
     enabled: canManage,
   });
 
-  const sections = query.data ?? [];
+  const sections = [...(query.data ?? [])].sort((a, b) => {
+    const ai = SECTION_ORDER.indexOf(a.section_key as (typeof SECTION_ORDER)[number]);
+    const bi = SECTION_ORDER.indexOf(b.section_key as (typeof SECTION_ORDER)[number]);
+    const ao = ai === -1 ? 999 : ai;
+    const bo = bi === -1 ? 999 : bi;
+    return ao - bo || a.id - b.id;
+  });
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -104,6 +127,36 @@ export function MarketingPage() {
     onError: (err: Error) => toast.error(err.message),
   });
 
+  const createMutation = useMutation({
+    mutationFn: async () => {
+      const key = newKey.trim().toLowerCase().replace(/\s+/g, '-');
+      if (!/^[a-z0-9][a-z0-9_-]{1,62}$/.test(key)) {
+        throw new Error('section_key غير صالح (حروف إنجليزية/أرقام/_/-)');
+      }
+      let content: Record<string, unknown>;
+      try {
+        content = JSON.parse(newJson) as Record<string, unknown>;
+      } catch {
+        throw new Error('محتوى JSON غير صالح');
+      }
+      if (!content || typeof content !== 'object' || Array.isArray(content)) {
+        throw new Error('المحتوى يجب أن يكون كائن JSON');
+      }
+      return apiClient<MarketingSection>('/marketing-sections', {
+        method: 'POST',
+        body: JSON.stringify({ section_key: key, content, is_active: false }),
+      });
+    },
+    onSuccess: () => {
+      toast.success('تم إنشاء القسم');
+      qc.invalidateQueries({ queryKey: ['marketing-sections'] });
+      setShowAdvancedCreate(false);
+      setNewKey('');
+      setNewJson('{\n  \n}');
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
   const toggleMutation = useMutation({
     mutationFn: (s: MarketingSection) =>
       apiClient<MarketingSection>(`/marketing-sections/${s.id}`, {
@@ -114,6 +167,15 @@ export function MarketingPage() {
     onError: (err: Error) => toast.error(err.message),
   });
 
+  function openEditor(s: MarketingSection) {
+    const content =
+      s.content && typeof s.content === 'object' && !Array.isArray(s.content)
+        ? { ...s.content }
+        : {};
+    setEditing(s);
+    setDraft(content);
+  }
+
   async function attachMedia(path: string, mediaId: number) {
     if (!editing) return;
     try {
@@ -121,9 +183,13 @@ export function MarketingPage() {
         method: 'POST',
         body: JSON.stringify({ path, media_id: mediaId }),
       });
-      setDraft(updated.content);
+      const next =
+        updated.content && typeof updated.content === 'object' && !Array.isArray(updated.content)
+          ? updated.content
+          : {};
+      setDraft(next);
       qc.setQueryData(['marketing-sections'], (old: MarketingSection[] | undefined) =>
-        (old ?? []).map((s) => (s.id === updated.id ? updated : s)),
+        (old ?? []).map((row) => (row.id === updated.id ? updated : row)),
       );
       qc.invalidateQueries({ queryKey: ['media'] });
       toast.success('تم ربط الصورة');
@@ -183,20 +249,32 @@ export function MarketingPage() {
   return (
     <>
       <AdminHeader title="محتوى الموقع" crumb="التسويق ← أقسام الموقع" />
-      <AdminContent>
+      <AdminContent className="flex flex-col gap-4">
         {query.isLoading ? (
           <div className="rounded-[18px] border border-cream-line bg-white p-5 text-[13px] text-ink-dim">جاري التحميل…</div>
+        ) : sections.length === 0 ? (
+          <div className="rounded-[18px] border border-cream-line bg-white p-5 text-[13px] text-ink-dim">
+            لا توجد أقسام — أنشئ قسمًا من الخيار المتقدم بالأسفل أو شغّل سيدرز المحتوى.
+          </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
-            {sections.filter((s) => s.section_key !== 'pricing').map((s) => (
+            {sections.map((s) => (
               <article key={s.id} className="flex flex-col rounded-[18px] border border-cream-line bg-white p-4">
                 <div className="flex items-start gap-3">
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-navy-800 text-gold-soft">
                     <Icon name={ICONS[s.section_key] ?? 'fa-solid fa-file'} />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-[15px] font-extrabold text-ink">{LABELS[s.section_key] ?? s.section_key}</h3>
-                    <p className="mt-0.5 text-[12px] text-ink-dim">{HINTS[s.section_key]}</p>
+                    <h3 className="text-[15px] font-extrabold text-ink">
+                      {LABELS[s.section_key] ?? s.section_key}
+                    </h3>
+                    <p className="mt-0.5 text-[12px] text-ink-dim">
+                      {HINTS[s.section_key] ?? (
+                        <span className="font-latin" dir="ltr">
+                          {s.section_key}
+                        </span>
+                      )}
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -217,10 +295,7 @@ export function MarketingPage() {
                   </span>
                   <button
                     type="button"
-                    onClick={() => {
-                      setEditing(s);
-                      setDraft(s.content);
-                    }}
+                    onClick={() => openEditor(s)}
                     className="rounded-full bg-navy-800 px-4 py-1.5 text-[12.5px] font-bold text-white"
                   >
                     تعديل
@@ -230,6 +305,51 @@ export function MarketingPage() {
             ))}
           </div>
         )}
+
+        <div className="rounded-[18px] border border-dashed border-cream-line2 bg-white p-4">
+          <button
+            type="button"
+            onClick={() => setShowAdvancedCreate((v) => !v)}
+            className="inline-flex items-center gap-2 text-[13px] font-bold text-navy"
+          >
+            <Icon name="fa-solid fa-wrench" className="text-[12px] text-gold-deep" />
+            متقدم: إضافة قسم/مفتاح جديد
+          </button>
+          {showAdvancedCreate ? (
+            <div className="mt-3 space-y-3 border-t border-[#f0ece1] pt-3">
+              <p className="text-[12px] text-ink-dim">
+                للحالات النادرة فقط — قسم بلا فورم مخصص سيظهر محرّر JSON. الأفضل استخدام الأقسام العشرة المعروفة.
+              </p>
+              <div>
+                <label className="mb-1 block text-[11.5px] font-semibold text-ink-soft">section_key</label>
+                <input
+                  className="w-full rounded-xl border border-cream-line2 bg-white px-3.5 py-2.5 font-latin text-[13.5px]"
+                  dir="ltr"
+                  placeholder="e.g. custom-banner"
+                  value={newKey}
+                  onChange={(e) => setNewKey(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-[11.5px] font-semibold text-ink-soft">content (JSON)</label>
+                <textarea
+                  className="min-h-[140px] w-full rounded-xl border border-cream-line2 bg-white px-3.5 py-2.5 font-latin text-[12.5px]"
+                  dir="ltr"
+                  value={newJson}
+                  onChange={(e) => setNewJson(e.target.value)}
+                />
+              </div>
+              <button
+                type="button"
+                disabled={createMutation.isPending}
+                onClick={() => createMutation.mutate()}
+                className="rounded-full bg-navy-800 px-4 py-2 text-[12.5px] font-bold text-white disabled:opacity-70"
+              >
+                {createMutation.isPending ? 'جاري الإنشاء…' : 'إنشاء القسم'}
+              </button>
+            </div>
+          ) : null}
+        </div>
       </AdminContent>
     </>
   );
@@ -665,6 +785,9 @@ function SectionEditor({
             <Field label="الصف" value={str(content.grade_label)} onChange={(v) => set('grade_label', v)} />
             <Field label="المادة" value={str(content.subject_label)} onChange={(v) => set('subject_label', v)} />
             <Field label="عدد الساعات" value={str(content.hours_label)} onChange={(v) => set('hours_label', v)} />
+            <Field label="placeholder الصف" value={str(content.grade_placeholder)} onChange={(v) => set('grade_placeholder', v)} />
+            <Field label="placeholder المادة" value={str(content.subject_placeholder)} onChange={(v) => set('subject_placeholder', v)} />
+            <Field label="placeholder الساعات" value={str(content.hours_placeholder)} onChange={(v) => set('hours_placeholder', v)} />
           </div>
         </SectionBlock>
         <SectionBlock title="مميزات بجانب النموذج" icon="fa-solid fa-star">
@@ -791,7 +914,31 @@ function SectionEditor({
     );
   }
 
-  return <div className="text-ink-dim">قسم غير معروف</div>;
+  return (
+    <div className="space-y-3">
+      <SectionBlock
+        title="محرّر JSON (قسم مخصص)"
+        icon="fa-solid fa-code"
+        hint="لا يوجد فورم مخصص لهذا القسم — عدّل JSON بحذر"
+      >
+        <textarea
+          className="min-h-[320px] w-full rounded-xl border border-cream-line2 bg-white px-3.5 py-2.5 font-latin text-[12.5px] text-ink"
+          dir="ltr"
+          value={JSON.stringify(content ?? {}, null, 2)}
+          onChange={(e) => {
+            try {
+              const parsed = JSON.parse(e.target.value) as Record<string, unknown>;
+              if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                setContent(parsed);
+              }
+            } catch {
+              // keep typing until valid JSON
+            }
+          }}
+        />
+      </SectionBlock>
+    </div>
+  );
 }
 
 function NavItemsEditor({
