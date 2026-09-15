@@ -153,6 +153,7 @@ export function SeoSettingsPage() {
                     label="Favicon"
                     valueId={removeFavicon ? null : faviconId}
                     valueUrl={removeFavicon ? null : faviconUrl}
+                    forceFormat="png"
                     onChange={(m) => {
                       setFaviconId(m.id);
                       setFaviconUrl(m.url);

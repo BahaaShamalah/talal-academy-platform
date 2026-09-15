@@ -19,7 +19,7 @@ class StoreMediaRequest extends FormRequest
         return [
             'file' => ['required', 'file', 'max:10240'],
             'alt_text' => ['nullable', 'string', 'max:255'],
-            'force_format' => ['nullable', 'string', 'in:avif,webp,jpeg'],
+            'force_format' => ['nullable', 'string', 'in:avif,webp,jpeg,png'],
         ];
     }
 

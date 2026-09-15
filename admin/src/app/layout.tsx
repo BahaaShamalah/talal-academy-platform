@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Cairo, El_Messiri, Space_Grotesk } from 'next/font/google';
 import { AuthProvider } from '@/components/auth/auth-provider';
 import { Providers } from '@/components/providers';
+import { getApiBaseUrl } from '@/lib/auth';
 import './globals.css';
 
 const cairo = Cairo({
@@ -25,11 +26,38 @@ const grotesk = Space_Grotesk({
   display: 'swap',
 });
 
-export const metadata: Metadata = {
-  title: 'طلال أكاديمي | لوحة التحكم',
-  description: 'لوحة التحكم الإدارية — طلال أكاديمي',
-  icons: { icon: '/assets/talal-symbol.png' },
+const DEFAULT_TITLE = 'طلال أكاديمي | لوحة التحكم';
+const DEFAULT_DESCRIPTION = 'لوحة التحكم الإدارية — طلال أكاديمي';
+const DEFAULT_FAVICON = '/assets/talal-symbol.png';
+
+type PublicSeoSettings = {
+  seo_title?: string | null;
+  favicon_url?: string | null;
 };
+
+async function fetchPublicSeoSettings(): Promise<PublicSeoSettings | null> {
+  const backend = getApiBaseUrl();
+  try {
+    const res = await fetch(`${backend}/api/v1/public/seo-settings`, {
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as PublicSeoSettings;
+  } catch {
+    return null;
+  }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await fetchPublicSeoSettings();
+  const favicon = seo?.favicon_url?.trim() || DEFAULT_FAVICON;
+
+  return {
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    icons: { icon: favicon },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: '#061a3a',

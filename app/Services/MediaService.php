@@ -93,6 +93,7 @@ class MediaService
             'avif' => $image->toAvif($quality),
             'webp' => $image->toWebp($quality),
             'jpeg' => $image->toJpeg($quality),
+            'png' => $image->toPng(),
             default => throw ValidationException::withMessages([
                 'file' => ['صيغة الإخراج غير مدعومة.'],
             ]),
@@ -105,6 +106,7 @@ class MediaService
             'avif' => 'image/avif',
             'webp' => 'image/webp',
             'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
         };
 
         $media = Media::query()->create([
@@ -129,14 +131,14 @@ class MediaService
     }
 
     /**
-     * @param  'avif'|'webp'|'jpeg'|null  $forceFormat
+     * @param  'avif'|'webp'|'jpeg'|'png'|null  $forceFormat
      */
     public function resolveOutputFormat(?string $forceFormat = null): string
     {
         if ($forceFormat !== null && $forceFormat !== '') {
-            if (! in_array($forceFormat, ['avif', 'webp', 'jpeg'], true)) {
+            if (! in_array($forceFormat, ['avif', 'webp', 'jpeg', 'png'], true)) {
                 throw ValidationException::withMessages([
-                    'force_format' => ['الصيغة المسموحة: avif أو webp أو jpeg.'],
+                    'force_format' => ['الصيغة المسموحة: avif أو webp أو jpeg أو png.'],
                 ]);
             }
 

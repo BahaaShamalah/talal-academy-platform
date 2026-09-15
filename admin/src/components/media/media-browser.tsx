@@ -63,7 +63,7 @@ export function MediaBrowser({
   onSelect?: (item: MediaItem) => void;
   compact?: boolean;
   mode?: 'full' | 'library' | 'upload';
-  forceFormat?: 'avif' | 'webp' | 'jpeg';
+  forceFormat?: 'avif' | 'webp' | 'jpeg' | 'png';
 }) {
   const [search, setSearch] = useState('');
   const [mime, setMime] = useState('');

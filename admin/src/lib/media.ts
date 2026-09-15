@@ -45,7 +45,7 @@ export async function fetchMediaList(params: {
 export async function uploadMediaFile(
   file: File,
   altText?: string,
-  forceFormat?: 'avif' | 'webp' | 'jpeg',
+  forceFormat?: 'avif' | 'webp' | 'jpeg' | 'png',
 ): Promise<MediaItem> {
   const body = new FormData();
   body.append('file', file);
@@ -67,7 +67,7 @@ export async function uploadMediaFile(
 export async function uploadMediaSequential(
   files: File[],
   onProgress: (index: number, status: 'uploading' | 'done' | 'error', error?: string) => void,
-  forceFormat?: 'avif' | 'webp' | 'jpeg',
+  forceFormat?: 'avif' | 'webp' | 'jpeg' | 'png',
 ): Promise<MediaItem[]> {
   const uploaded: MediaItem[] = [];
   for (let i = 0; i < files.length; i++) {

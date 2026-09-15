@@ -23,7 +23,7 @@ export function MediaPicker({
   onChange: (media: MediaItem) => void;
   onClear?: () => void;
   compact?: boolean;
-  forceFormat?: 'avif' | 'webp' | 'jpeg';
+  forceFormat?: 'avif' | 'webp' | 'jpeg' | 'png';
 }) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<'library' | 'upload'>('library');
