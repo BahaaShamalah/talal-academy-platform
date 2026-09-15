@@ -17,8 +17,15 @@ class StoreMediaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file' => ['required', 'file', 'max:10240'],
+            // Input file from the user (source image) — not the storage/output format.
+            'file' => [
+                'required',
+                'file',
+                'max:10240',
+                'mimes:jpg,jpeg,png,webp,gif',
+            ],
             'alt_text' => ['nullable', 'string', 'max:255'],
+            // Output encoding only (MediaService conversion target). Separate from input mimes.
             'force_format' => ['nullable', 'string', 'in:avif,webp,jpeg,png'],
         ];
     }
@@ -32,6 +39,8 @@ class StoreMediaRequest extends FormRequest
             'file.required' => 'يجب اختيار صورة للرفع.',
             'file.file' => 'الملف المرفوع غير صالح.',
             'file.max' => 'حجم الصورة أكبر من المسموح (الحد الأقصى 10 ميغابايت).',
+            'file.mimes' => 'يُسمح فقط بصور JPG أو PNG أو WebP أو GIF كملف مدخل.',
+            'force_format.in' => 'صيغة التخزين force_format المسموحة: avif أو webp أو jpeg أو png.',
         ];
     }
 }

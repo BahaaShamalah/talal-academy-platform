@@ -131,14 +131,17 @@ class MediaService
     }
 
     /**
+     * Storage/output format only (after accept). Not the uploaded file's extension/mime.
+     *
      * @param  'avif'|'webp'|'jpeg'|'png'|null  $forceFormat
      */
     public function resolveOutputFormat(?string $forceFormat = null): string
     {
         if ($forceFormat !== null && $forceFormat !== '') {
+            $forceFormat = strtolower(trim($forceFormat));
             if (! in_array($forceFormat, ['avif', 'webp', 'jpeg', 'png'], true)) {
                 throw ValidationException::withMessages([
-                    'force_format' => ['الصيغة المسموحة: avif أو webp أو jpeg أو png.'],
+                    'force_format' => ['صيغة التخزين force_format المسموحة: avif أو webp أو jpeg أو png.'],
                 ]);
             }
 
@@ -269,18 +272,23 @@ class MediaService
         }
 
         $ext = strtolower($file->getClientOriginalExtension() ?: '');
-        $allowedExt = config('media.allowed_extensions', []);
+        $allowedExt = config('media.allowed_extensions', ['jpg', 'jpeg', 'png', 'webp', 'gif']);
         if (! in_array($ext, $allowedExt, true)) {
             throw ValidationException::withMessages([
-                'file' => ['يُسمح فقط بصور JPG أو PNG أو WebP أو GIF.'],
+                'file' => ['يُسمح فقط بصور JPG أو PNG أو WebP أو GIF كملف مدخل.'],
             ]);
         }
 
         $mime = (string) ($file->getMimeType() ?: '');
-        $allowedMimes = config('media.allowed_mimes', []);
+        $allowedMimes = config('media.allowed_mimes', [
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'image/gif',
+        ]);
         if (! in_array($mime, $allowedMimes, true)) {
             throw ValidationException::withMessages([
-                'file' => ['الملف المرفوع ليس صورة صالحة.'],
+                'file' => ['الملف المرفوع ليس صورة صالحة (المدخلات المقبولة: JPG/PNG/WebP/GIF).'],
             ]);
         }
 
